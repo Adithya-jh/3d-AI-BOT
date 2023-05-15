@@ -1,4 +1,5 @@
 'use client';
+import { sendTextToOpenAi } from '@/utils/sendTextToOpenAi';
 import React, { useState } from 'react';
 
 const TextToSpeech = () => {
@@ -15,15 +16,37 @@ const TextToSpeech = () => {
     if (synth && !isLoading) {
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.voice = selectedVoices;
-      utterance.rate = 0.8;
+      utterance.rate = 0.2;
       synth.speak(utterance);
+      setIsLoading(true);
+
+      utterance.onend = () => {
+        setIsLoading(false);
+      };
     }
   };
 
   const handleUserText = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    speak(userText);
+
+    try {
+      const message = await sendTextToOpenAi(userText);
+      speak(message);
+      setIsLoading(true);
+    } catch (error) {
+      let message = '';
+      if (error.message === 'Failed to fetch') {
+        message = 'Please check your internet connection';
+      } else {
+        message = error.message;
+      }
+      console.log(error.message);
+    } finally {
+      setIsLoading(false);
+      setuserText('');
+    }
+
     // const res = await fetch('/api/text-to-speech', {
     //   method: 'POST',
     //   headers: {
@@ -47,11 +70,12 @@ const TextToSpeech = () => {
           placeholder="Ask me anything"
         />
         <button
+          disabled={isLoading}
           className="text-[#b00c3f] p-2 border border-[#b00c3f]
          rounded-lg disabled:text-blue-100 disabled:cursor-not-allowed disabled:bg-gray-500 hover:scale-100
           hover:text-black hover:bg-[#b00c3f] duration-300 transition-all"
         >
-          Ask
+          {isLoading ? 'Thinking...' : 'Ask'}
         </button>
       </form>
     </div>
