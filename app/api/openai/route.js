@@ -7,6 +7,7 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 export async function POST(request) {
+  // added stuffs
   const { userText } = await request.json();
 
   const completion = await openai.createChatCompletion({
