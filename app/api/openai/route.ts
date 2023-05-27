@@ -1,3 +1,4 @@
+import { NextResponse } from 'next/server';
 import { Configuration, OpenAIApi } from 'openai';
 
 const configuration = new Configuration({
@@ -19,5 +20,5 @@ export async function POST(request) {
   const aiMessage = completion.data.choices[0].message;
 
   console.log(aiMessage?.content);
-  return new Response({ message: aiMessage?.content }, { status: 200 });
+  return NextResponse.json({ message: aiMessage?.content }, { status: 200 });
 }

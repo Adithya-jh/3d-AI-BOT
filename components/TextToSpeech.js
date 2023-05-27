@@ -1,5 +1,5 @@
 'use client';
-import { sendTextToOpenAi } from '@/utils/sendTextToOpenAi';
+import { sendTextToOpenAi } from '../utils/sendTextToOpenAi';
 import React, { useState } from 'react';
 
 const TextToSpeech = () => {
@@ -28,32 +28,40 @@ const TextToSpeech = () => {
 
   const handleUserText = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
 
     try {
-      const message = await sendTextToOpenAi(userText);
-      speak(message);
-      setIsLoading(true);
-    } catch (error) {
-      let message = '';
-      if (error.message === 'Failed to fetch') {
-        message = 'Please check your internet connection';
-      } else {
-        message = error.message;
-      }
-      console.log(error.message);
-    } finally {
-      setIsLoading(false);
-      setuserText('');
-    }
+      const response = await fetch('/api/openai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userText }),
 
-    // const res = await fetch('/api/text-to-speech', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({ userText }),
-    // });
+        // console.log();
+      });
+      const { message } = await response.json();
+      console.log(message);
+    } catch (error) {
+      console.log(error);
+    }
+    setIsLoading(true);
+
+    // try {
+    //   const message = await sendTextToOpenAi(userText);
+    //   speak(message);
+    //   setIsLoading(true);
+    // } catch (error) {
+    //   let message = '';
+    //   if (error.message === 'Failed to fetch') {
+    //     message = 'Please check your internet connection';
+    //   } else {
+    //     message = error.message;
+    //   }
+    //   console.log(error.message);
+    // } finally {
+    //   setIsLoading(false);
+    //   setuserText('');
+    // }
   };
   return (
     <div className="relative top-0 z-50">
@@ -70,6 +78,7 @@ const TextToSpeech = () => {
           placeholder="Ask me anything"
         />
         <button
+          onClick={() => speak(userText)}
           disabled={isLoading}
           className="text-[#b00c3f] p-2 border border-[#b00c3f]
          rounded-lg disabled:text-blue-100 disabled:cursor-not-allowed disabled:bg-gray-500 hover:scale-100
